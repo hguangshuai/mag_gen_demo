@@ -118,59 +118,41 @@ def structure_to_cif(
 
 # Page config
 st.set_page_config(
-    page_title="RAMMED - Rapid AI-enhanced Magnetic Material Discovery",
+    page_title="Magnetic VAE Generator",
     page_icon="🧲",
     layout="wide",
 )
 
 # Title
-st.title("🧲 Rapid, AI-enhanced Magnetic Material Discovery (RAMMED)")
+st.title("🧲 Magnetic VAE Generator")
 st.markdown(
-    "**Preliminary results**: Generate CIF files from given magnetic moments. "
-    "Trained on 900+ magnetic structures and 2000+ non-magnetic structures. "
+    "Generate crystal structures with desired magnetic properties. "
     "**No PyTorch required** - uses pure numpy!"
+)
+
+# Disclaimer
+st.warning(
+    "⚠️ **Disclaimer**: This is a very preliminary result. "
+    "We are not responsible for any predictions made by this model."
 )
 
 # Sidebar
 with st.sidebar:
     st.header("⚙️ Parameters")
-    
-    # Magnetic properties selection
-    has_magnetic = st.radio(
-        "Has magnetic properties?",
-        options=["Yes", "No (Non-magnetic)"],
-        index=0,
+    magmom = st.slider(
+        "Magnetic moment (μB per atom)",
+        min_value=0.5,
+        max_value=10.0,
+        value=2.0,
+        step=0.1,
     )
-    
-    if has_magnetic == "No (Non-magnetic)":
-        # Non-magnetic: automatically set magmom < 2, disable slider
-        magmom = st.slider(
-            "Magnetic moment (μB per atom)",
-            min_value=0.0,
-            max_value=1.9,
-            value=0.0,
-            step=0.1,
-            disabled=True,
-        )
-        actual_magmom = 0.0  # Use 0.0 for non-magnetic
-    else:
-        # Magnetic: user can choose, but add +2 to the value when running
-        magmom = st.slider(
-            "Magnetic moment (μB per atom)",
-            min_value=0.5,
-            max_value=10.0,
-            value=2.0,
-            step=0.1,
-        )
-        actual_magmom = magmom + 2.0  # Add 2 for magnetic materials
-    
     ordering = st.radio(
         "Ordering",
         options=["Ordered", "Disordered"],
         index=1,
     )
     num_atoms = st.slider(
-        "Number of atoms (0 = auto, min 2)",
+        "Number of atoms (0 = auto)",
         min_value=0,
         max_value=12,
         value=0,
@@ -186,12 +168,10 @@ if generate_button:
         
         with st.spinner("Generating structure..."):
             ordered_flag = 1 if ordering == "Ordered" else 0
-            # If num_atoms < 2, set to None (auto)
-            num_atoms_value = int(num_atoms) if num_atoms >= 2 else None
+            num_atoms_value = int(num_atoms) if num_atoms > 0 else None
             
-            # Use actual_magmom (already adjusted based on magnetic properties)
             result = generator.generate(
-                magmom_per_atom=float(actual_magmom),
+                magmom_per_atom=float(magmom),
                 ordered=ordered_flag,
                 num_atoms=num_atoms_value,
             )
@@ -239,14 +219,15 @@ if generate_button:
 with st.expander("ℹ️ How to use"):
     st.markdown("""
     1. **Adjust parameters** in the sidebar:
-       - **Magnetic moment**: Desired magnetic moment per atom (μB)
-       - **Ordering**: Choose Ordered or Disordered structure
-       - **Number of atoms**: Set to 0 for automatic (minimum 2 atoms), or specify a number (2-12)
+       - Magnetic moment: Desired magnetic moment per atom (μB)
+       - Ordering: Choose Ordered or Disordered structure
+       - Number of atoms: Set to 0 for automatic, or specify a number
     
     2. **Click "Generate Structure"** to create a new crystal structure
     
     3. **Download the CIF file** to use in your simulations
     
-    **Note**: This is a preliminary version using numpy. The model was trained on 900+ magnetic structures and 2000+ non-magnetic structures.
+    **Note**: This is a simplified version using numpy. For higher accuracy, 
+    use the full PyTorch model version.
     """)
 

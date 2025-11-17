@@ -1,5 +1,11 @@
 # Rapid, AI-enhanced Magnetic Material Discovery (RAMMED)
 
+## ⚠️ Disclaimer
+
+**This is a very preliminary result. We are not responsible for any predictions made by this model.**
+
+---
+
 A Streamlit web application for generating crystal structures with desired magnetic properties.
 
 ## Overview
