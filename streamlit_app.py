@@ -129,6 +129,15 @@ st.markdown(
     "Generate crystal structures with desired magnetic properties."
 )
 
+st.markdown(
+    "**Copyright (c) 2025 The Entropy for Energy (S4E) laboratory, Johns Hopkins University, Corey Oses Group**"
+)
+
+st.markdown(
+    "This is a preliminary result from generative model experiments conducted by the JHU S4E Prof. Oses group. "
+    "This demo is for demonstration purposes only."
+)
+
 # Disclaimer
 st.warning(
     "⚠️ **Disclaimer**: This is a very preliminary result. "
