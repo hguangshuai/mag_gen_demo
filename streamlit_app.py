@@ -118,13 +118,13 @@ def structure_to_cif(
 
 # Page config
 st.set_page_config(
-    page_title="Magnetic VAE Generator",
+    page_title="RAMMED",
     page_icon="🧲",
     layout="wide",
 )
 
 # Title
-st.title("🧲 Magnetic VAE Generator")
+st.title("🧲 Rapid, AI-enhanced Magnetic Material Discovery (RAMMED)")
 st.markdown(
     "Generate crystal structures with desired magnetic properties."
 )
