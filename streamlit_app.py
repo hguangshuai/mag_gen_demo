@@ -126,8 +126,7 @@ st.set_page_config(
 # Title
 st.title("🧲 Magnetic VAE Generator")
 st.markdown(
-    "Generate crystal structures with desired magnetic properties. "
-    "**No PyTorch required** - uses pure numpy!"
+    "Generate crystal structures with desired magnetic properties."
 )
 
 # Disclaimer

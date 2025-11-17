@@ -10,9 +10,9 @@ A Streamlit web application for generating crystal structures with desired magne
 
 ## Overview
 
-Preliminary results: Generate CIF files from given magnetic moments. This model was trained on 900+ magnetic structures and 2000+ non-magnetic structures.
+This is a VAE (Variational Autoencoder) model for generating crystal structures with desired magnetic properties. This is a preliminary result from generative model experiments conducted by the JHU S4E Prof. Oses group. This is a test demo.
 
-**No PyTorch required** - uses pure numpy for fast deployment!
+Preliminary results: Generate CIF files from given magnetic moments. This model was trained on 900+ magnetic structures and 2000+ non-magnetic structures.
 
 ## Files
 
