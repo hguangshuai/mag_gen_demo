@@ -163,7 +163,6 @@ with st.sidebar:
             step=0.1,
         )
         actual_magmom = magmom + 2.0  # Add 2 for magnetic materials
-        st.info(f"⚠️ Actual value used: {actual_magmom:.1f} μB/atom (input + 2.0)")
     
     ordering = st.radio(
         "Ordering",
@@ -214,8 +213,6 @@ if generate_button:
             st.subheader("📊 Structure Info")
             st.metric("Composition", composition)
             st.metric("Magnetic Moment", f"{result['magmom_per_atom']:.2f} μB/atom")
-            if has_magnetic == "Yes":
-                st.caption(f"Input value: {magmom:.1f} μB/atom → Actual: {result['magmom_per_atom']:.2f} μB/atom (+2.0)")
             st.metric("Ordered", "Yes" if ordered_flag else "No")
             st.metric("Number of Atoms", result["num_atoms"])
             st.metric("Elements", ", ".join(result["elements"]))
