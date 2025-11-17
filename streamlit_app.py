@@ -143,16 +143,16 @@ with st.sidebar:
     )
     
     if has_magnetic == "No (Non-magnetic)":
-        # Non-magnetic: automatically set magmom < 2
+        # Non-magnetic: automatically set magmom < 2, disable slider
         magmom = st.slider(
-            "Magnetic moment (μB per atom) - Auto < 2.0",
+            "Magnetic moment (μB per atom)",
             min_value=0.0,
             max_value=1.9,
             value=0.0,
             step=0.1,
-            disabled=False,
+            disabled=True,
         )
-        actual_magmom = magmom  # Use the value directly for non-magnetic
+        actual_magmom = 0.0  # Use 0.0 for non-magnetic
     else:
         # Magnetic: user can choose, but add +2 to the value when running
         magmom = st.slider(
