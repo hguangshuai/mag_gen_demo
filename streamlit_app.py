@@ -124,9 +124,10 @@ st.set_page_config(
 )
 
 # Title
-st.title("🧲 Magnetic VAE Generator")
+st.title("🧲 Rapid, AI-enhanced Magnetic Material Discovery (RAMMED)")
 st.markdown(
-    "Generate crystal structures with desired magnetic properties. "
+    "**Preliminary results**: Generate CIF files from given magnetic moments. "
+    "Trained on 900+ magnetic structures and 2000+ non-magnetic structures. "
     "**No PyTorch required** - uses pure numpy!"
 )
 
@@ -146,7 +147,7 @@ with st.sidebar:
         index=1,
     )
     num_atoms = st.slider(
-        "Number of atoms (0 = auto)",
+        "Number of atoms (0 = auto, min 2)",
         min_value=0,
         max_value=12,
         value=0,

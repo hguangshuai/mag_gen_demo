@@ -1,57 +1,80 @@
-# Magnetic VAE Generator - Streamlit Demo
+# Rapid, AI-enhanced Magnetic Material Discovery (RAMMED)
 
-一键部署的磁材料结构生成器。
+A Streamlit web application for generating crystal structures with desired magnetic properties.
 
-## 📁 文件说明
+## 🧲 Overview
 
-- `streamlit_app.py` - 主应用文件
-- `simple_generator.py` - 生成器（纯 numpy）
-- `weights.npz` - 模型权重
-- `requirements.txt` - Python 依赖
+**Preliminary results**: Generate CIF files from given magnetic moments. This model was trained on 900+ magnetic structures and 2000+ non-magnetic structures.
 
-## 🚀 部署到 Streamlit Cloud
+**No PyTorch required** - uses pure numpy for fast deployment!
 
-### 方法1: GitHub + Streamlit Cloud（推荐）
+## 🚀 Quick Start
 
-1. **创建 GitHub 仓库**
+### Deploy to Streamlit Cloud
+
+1. **Fork or clone this repository**
    ```bash
-   cd streamlit_deploy
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git branch -M main
-   git remote add origin https://github.com/你的用户名/仓库名.git
-   git push -u origin main
+   git clone git@github.com:hguangshuai/mag_gen_demo.git
+   cd mag_gen_demo
    ```
 
-2. **部署到 Streamlit Cloud**
-   - 访问 https://share.streamlit.io
-   - 点击 "New app"
-   - 连接 GitHub 账户
-   - 选择仓库
+2. **Deploy to Streamlit Cloud**
+   - Visit https://share.streamlit.io
+   - Click "New app"
+   - Connect your GitHub account
+   - Select this repository
    - Main file path: `streamlit_app.py`
-   - 点击 "Deploy!"
-   - 等待 1-2 分钟完成
+   - Click "Deploy!"
+   - Wait 1-2 minutes for deployment
 
-3. **分享链接**
-   - 部署完成后会得到一个 URL
-   - 直接分享给别人即可使用！
+3. **Share the link** - Your app will be live at a URL like:
+   ```
+   https://mag-gen-demo.streamlit.app
+   ```
 
-### 方法2: 直接上传（如果支持）
+## 📁 Files
 
-如果 Streamlit Cloud 支持直接上传，直接上传整个 `streamlit_deploy/` 文件夹。
+- `streamlit_app.py` - Main Streamlit application
+- `simple_generator.py` - Structure generator (pure numpy)
+- `weights.npz` - Model weights (extracted from trained VAE)
+- `requirements.txt` - Python dependencies
 
-## ✅ 功能
+## ⚙️ Usage
 
-- ✅ 调整磁矩参数
-- ✅ 选择 Ordered/Disordered
-- ✅ 生成 CIF 文件
-- ✅ 下载结构文件
-- ✅ 完全免费，无需配置
+1. **Adjust parameters** in the sidebar:
+   - **Magnetic moment**: Desired magnetic moment per atom (μB)
+   - **Ordering**: Choose Ordered or Disordered structure
+   - **Number of atoms**: Set to 0 for automatic (minimum 2 atoms), or specify a number (2-12)
 
-## 📝 注意事项
+2. **Click "Generate Structure"** to create a new crystal structure
 
-- 首次加载需要几秒钟（加载模型权重）
-- 确保所有 4 个文件都在同一目录
-- 免费 tier 有使用限制，但足够 demo 使用
+3. **Download the CIF file** for use in your simulations
 
+## 📊 Model Information
+
+- **Training data**: 900+ magnetic structures + 2000+ non-magnetic structures
+- **Output**: CIF files with crystal structures
+- **Input**: Magnetic moment (μB per atom) and ordering preference
+- **Implementation**: Simplified numpy-based generator (no PyTorch dependency)
+
+## 🔄 Updates
+
+This repository is automatically synced with Streamlit Cloud. Simply push changes to GitHub and the app will automatically redeploy.
+
+```bash
+git add .
+git commit -m "Your update message"
+git push
+```
+
+## ⚠️ Note
+
+This is a **preliminary version** using a simplified numpy-based generator. For higher accuracy, consider using the full PyTorch model version.
+
+## 📝 License
+
+[Add your license here]
+
+## 🙏 Acknowledgments
+
+Trained on magnetic and non-magnetic crystal structure datasets.
