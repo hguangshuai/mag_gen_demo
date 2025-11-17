@@ -142,7 +142,7 @@ with st.sidebar:
     
     # Yes/No selection for magnetic moment
     use_magnetic = st.radio(
-        "Specify magnetic moment?",
+        "Is magnetic?",
         options=["Yes", "No"],
         index=0,
     )
