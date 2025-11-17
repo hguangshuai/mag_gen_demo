@@ -134,13 +134,37 @@ st.markdown(
 # Sidebar
 with st.sidebar:
     st.header("⚙️ Parameters")
-    magmom = st.slider(
-        "Magnetic moment (μB per atom)",
-        min_value=0.5,
-        max_value=10.0,
-        value=2.0,
-        step=0.1,
+    
+    # Magnetic properties selection
+    has_magnetic = st.radio(
+        "Has magnetic properties?",
+        options=["Yes", "No (Non-magnetic)"],
+        index=0,
     )
+    
+    if has_magnetic == "No (Non-magnetic)":
+        # Non-magnetic: automatically set magmom < 2
+        magmom = st.slider(
+            "Magnetic moment (μB per atom) - Auto < 2.0",
+            min_value=0.0,
+            max_value=1.9,
+            value=0.0,
+            step=0.1,
+            disabled=False,
+        )
+        actual_magmom = magmom  # Use the value directly for non-magnetic
+    else:
+        # Magnetic: user can choose, but add +2 to the value when running
+        magmom = st.slider(
+            "Magnetic moment (μB per atom)",
+            min_value=0.5,
+            max_value=10.0,
+            value=2.0,
+            step=0.1,
+        )
+        actual_magmom = magmom + 2.0  # Add 2 for magnetic materials
+        st.info(f"⚠️ Actual value used: {actual_magmom:.1f} μB/atom (input + 2.0)")
+    
     ordering = st.radio(
         "Ordering",
         options=["Ordered", "Disordered"],
@@ -166,8 +190,9 @@ if generate_button:
             # If num_atoms < 2, set to None (auto)
             num_atoms_value = int(num_atoms) if num_atoms >= 2 else None
             
+            # Use actual_magmom (already adjusted based on magnetic properties)
             result = generator.generate(
-                magmom_per_atom=float(magmom),
+                magmom_per_atom=float(actual_magmom),
                 ordered=ordered_flag,
                 num_atoms=num_atoms_value,
             )
@@ -189,6 +214,8 @@ if generate_button:
             st.subheader("📊 Structure Info")
             st.metric("Composition", composition)
             st.metric("Magnetic Moment", f"{result['magmom_per_atom']:.2f} μB/atom")
+            if has_magnetic == "Yes":
+                st.caption(f"Input value: {magmom:.1f} μB/atom → Actual: {result['magmom_per_atom']:.2f} μB/atom (+2.0)")
             st.metric("Ordered", "Yes" if ordered_flag else "No")
             st.metric("Number of Atoms", result["num_atoms"])
             st.metric("Elements", ", ".join(result["elements"]))
