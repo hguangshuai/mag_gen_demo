@@ -139,13 +139,32 @@ st.warning(
 # Sidebar
 with st.sidebar:
     st.header("⚙️ Parameters")
-    magmom = st.slider(
-        "Magnetic moment (μB per atom)",
-        min_value=0.5,
-        max_value=10.0,
-        value=2.0,
-        step=0.1,
+    
+    # Yes/No selection for magnetic moment
+    use_magnetic = st.radio(
+        "Specify magnetic moment?",
+        options=["Yes", "No"],
+        index=0,
     )
+    
+    if use_magnetic == "Yes":
+        magmom_input = st.slider(
+            "Magnetic moment (μB per atom)",
+            min_value=0.5,
+            max_value=10.0,
+            value=2.0,
+            step=0.1,
+        )
+    else:
+        # Random value between 0 and 2
+        if 'random_magmom' not in st.session_state:
+            st.session_state.random_magmom = np.random.uniform(0, 2)
+        magmom_input = st.session_state.random_magmom
+        st.info(f"Random magnetic moment: {magmom_input:.2f} μB/atom")
+        if st.button("🔄 Generate new random value"):
+            st.session_state.random_magmom = np.random.uniform(0, 2)
+            st.rerun()
+    
     ordering = st.radio(
         "Ordering",
         options=["Ordered", "Disordered"],
@@ -169,6 +188,16 @@ if generate_button:
         with st.spinner("Generating structure..."):
             ordered_flag = 1 if ordering == "Ordered" else 0
             num_atoms_value = int(num_atoms) if num_atoms > 0 else None
+            
+            # If "No" was selected, generate a new random value for this generation
+            if use_magnetic == "No":
+                magmom_input = np.random.uniform(0, 2)
+            
+            # Automatically add 2 for "Yes" selection, use original value for "No"
+            if use_magnetic == "Yes":
+                magmom = magmom_input + 2.0
+            else:
+                magmom = magmom_input
             
             result = generator.generate(
                 magmom_per_atom=float(magmom),
@@ -218,14 +247,17 @@ if generate_button:
 # Instructions
 with st.expander("ℹ️ How to use"):
     st.markdown("""
-    1. **Adjust parameters** in the sidebar:
-       - Magnetic moment: Desired magnetic moment per atom (μB)
+    1. **Specify magnetic moment?**
+       - **Yes**: Choose your desired magnetic moment (will automatically add 2.0)
+       - **No**: A random value between 0-2 will be generated
+    
+    2. **Adjust other parameters** in the sidebar:
        - Ordering: Choose Ordered or Disordered structure
        - Number of atoms: Set to 0 for automatic, or specify a number
     
-    2. **Click "Generate Structure"** to create a new crystal structure
+    3. **Click "Generate Structure"** to create a new crystal structure
     
-    3. **Download the CIF file** to use in your simulations
+    4. **Download the CIF file** to use in your simulations
     
     **Note**: This is a simplified version using numpy. For higher accuracy, 
     use the full PyTorch model version.
