@@ -2,79 +2,52 @@
 
 A Streamlit web application for generating crystal structures with desired magnetic properties.
 
-## 🧲 Overview
+## Overview
 
-**Preliminary results**: Generate CIF files from given magnetic moments. This model was trained on 900+ magnetic structures and 2000+ non-magnetic structures.
+Preliminary results: Generate CIF files from given magnetic moments. This model was trained on 900+ magnetic structures and 2000+ non-magnetic structures.
 
 **No PyTorch required** - uses pure numpy for fast deployment!
 
-## 🚀 Quick Start
-
-### Deploy to Streamlit Cloud
-
-1. **Fork or clone this repository**
-   ```bash
-   git clone git@github.com:hguangshuai/mag_gen_demo.git
-   cd mag_gen_demo
-   ```
-
-2. **Deploy to Streamlit Cloud**
-   - Visit https://share.streamlit.io
-   - Click "New app"
-   - Connect your GitHub account
-   - Select this repository
-   - Main file path: `streamlit_app.py`
-   - Click "Deploy!"
-   - Wait 1-2 minutes for deployment
-
-3. **Share the link** - Your app will be live at a URL like:
-   ```
-   https://mag-gen-demo.streamlit.app
-   ```
-
-## 📁 Files
+## Files
 
 - `streamlit_app.py` - Main Streamlit application
 - `simple_generator.py` - Structure generator (pure numpy)
 - `weights.npz` - Model weights (extracted from trained VAE)
 - `requirements.txt` - Python dependencies
 
-## ⚙️ Usage
-
-1. **Adjust parameters** in the sidebar:
-   - **Magnetic moment**: Desired magnetic moment per atom (μB)
-   - **Ordering**: Choose Ordered or Disordered structure
-   - **Number of atoms**: Set to 0 for automatic (minimum 2 atoms), or specify a number (2-12)
-
-2. **Click "Generate Structure"** to create a new crystal structure
-
-3. **Download the CIF file** for use in your simulations
-
-## 📊 Model Information
+## Model Information
 
 - **Training data**: 900+ magnetic structures + 2000+ non-magnetic structures
 - **Output**: CIF files with crystal structures
 - **Input**: Magnetic moment (μB per atom) and ordering preference
 - **Implementation**: Simplified numpy-based generator (no PyTorch dependency)
 
-## 🔄 Updates
+## Ownership
 
-This repository is automatically synced with Streamlit Cloud. Simply push changes to GitHub and the app will automatically redeploy.
+This code is the exclusive property of **The Entropy for Energy (S4E) laboratory, Johns Hopkins University, Corey Oses Group**.
 
-```bash
-git add .
-git commit -m "Your update message"
-git push
-```
+**Any use of this code is not permitted.**
 
-## ⚠️ Note
+## License
 
-This is a **preliminary version** using a simplified numpy-based generator. For higher accuracy, consider using the full PyTorch model version.
+MIT License
 
-## 📝 License
+Copyright (c) 2024 The Entropy for Energy (S4E) laboratory, Johns Hopkins University, Corey Oses Group
 
-[Add your license here]
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-## 🙏 Acknowledgments
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-Trained on magnetic and non-magnetic crystal structure datasets.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
