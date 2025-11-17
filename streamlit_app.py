@@ -155,15 +155,6 @@ with st.sidebar:
             value=2.0,
             step=0.1,
         )
-    else:
-        # Random value between 0 and 2
-        if 'random_magmom' not in st.session_state:
-            st.session_state.random_magmom = np.random.uniform(0, 2)
-        magmom_input = st.session_state.random_magmom
-        st.info(f"Random magnetic moment: {magmom_input:.2f} μB/atom")
-        if st.button("🔄 Generate new random value"):
-            st.session_state.random_magmom = np.random.uniform(0, 2)
-            st.rerun()
     
     ordering = st.radio(
         "Ordering",
