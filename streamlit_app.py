@@ -118,7 +118,7 @@ def structure_to_cif(
 
 # Page config
 st.set_page_config(
-    page_title="Magnetic VAE Generator",
+    page_title="RAMMED - Rapid AI-enhanced Magnetic Material Discovery",
     page_icon="🧲",
     layout="wide",
 )
@@ -163,7 +163,8 @@ if generate_button:
         
         with st.spinner("Generating structure..."):
             ordered_flag = 1 if ordering == "Ordered" else 0
-            num_atoms_value = int(num_atoms) if num_atoms > 0 else None
+            # If num_atoms < 2, set to None (auto)
+            num_atoms_value = int(num_atoms) if num_atoms >= 2 else None
             
             result = generator.generate(
                 magmom_per_atom=float(magmom),
