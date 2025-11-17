@@ -215,15 +215,14 @@ if generate_button:
 with st.expander("ℹ️ How to use"):
     st.markdown("""
     1. **Adjust parameters** in the sidebar:
-       - Magnetic moment: Desired magnetic moment per atom (μB)
-       - Ordering: Choose Ordered or Disordered structure
-       - Number of atoms: Set to 0 for automatic, or specify a number
+       - **Magnetic moment**: Desired magnetic moment per atom (μB)
+       - **Ordering**: Choose Ordered or Disordered structure
+       - **Number of atoms**: Set to 0 for automatic (minimum 2 atoms), or specify a number (2-12)
     
     2. **Click "Generate Structure"** to create a new crystal structure
     
     3. **Download the CIF file** to use in your simulations
     
-    **Note**: This is a simplified version using numpy. For higher accuracy, 
-    use the full PyTorch model version.
+    **Note**: This is a preliminary version using numpy. The model was trained on 900+ magnetic structures and 2000+ non-magnetic structures.
     """)
 
