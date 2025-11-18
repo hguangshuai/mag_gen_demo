@@ -188,9 +188,9 @@ if generate_button:
             ordered_flag = 1 if ordering == "Ordered" else 0
             num_atoms_value = int(num_atoms) if num_atoms > 0 else None
             
-            # If "No" was selected, generate a new random value for this generation
+            # If "No" was selected, set magnetic moment to 0
             if use_magnetic == "No":
-                magmom_input = np.random.uniform(0, 2)
+                magmom_input = 0.0
             
             # Automatically add 2 for "Yes" selection, use original value for "No"
             if use_magnetic == "Yes":
