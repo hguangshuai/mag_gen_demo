@@ -54,8 +54,6 @@ def structure_to_cif(
     a, b, c, alpha, beta, gamma = lattice_to_params(lattice)
     buffer = StringIO()
     buffer.write(f"data_{name}\n")
-    buffer.write("_symmetry_space_group_name_H-M    'P 1'\n")
-    buffer.write("_symmetry_Int_Tables_number       1\n")
     buffer.write(f"_cell_length_a    {a:.6f}\n")
     buffer.write(f"_cell_length_b    {b:.6f}\n")
     buffer.write(f"_cell_length_c    {c:.6f}\n")
@@ -170,10 +168,10 @@ with st.sidebar:
         index=1,
     )
     num_atoms = st.slider(
-        "Number of atoms (0 = auto)",
-        min_value=0,
+        "Number of atoms",
+        min_value=3,
         max_value=12,
-        value=0,
+        value=3,
         step=1,
     )
     generate_button = st.button("🚀 Generate Structure", type="primary", use_container_width=True)
@@ -186,7 +184,7 @@ if generate_button:
         
         with st.spinner("Generating structure..."):
             ordered_flag = 1 if ordering == "Ordered" else 0
-            num_atoms_value = int(num_atoms) if num_atoms > 0 else None
+            num_atoms_value = int(num_atoms)
             
             # If "No" was selected, set magnetic moment to 0
             if use_magnetic == "No":
