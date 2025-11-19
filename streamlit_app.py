@@ -190,6 +190,9 @@ if generate_button:
             if use_magnetic == "No":
                 magmom_input = 0.0
             
+            # Save the display value (user's input)
+            display_magmom = magmom_input
+            
             # Automatically add 2 for "Yes" selection, use original value for "No"
             if use_magnetic == "Yes":
                 magmom = magmom_input + 2.0
@@ -218,7 +221,7 @@ if generate_button:
         with col1:
             st.subheader("📊 Structure Info")
             st.metric("Composition", composition)
-            st.metric("Magnetic Moment", f"{result['magmom_per_atom']:.2f} μB/atom")
+            st.metric("Magnetic Moment", f"{display_magmom:.2f} μB/atom")
             st.metric("Ordered", "Yes" if ordered_flag else "No")
             st.metric("Number of Atoms", result["num_atoms"])
             st.metric("Elements", ", ".join(result["elements"]))
