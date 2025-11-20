@@ -218,10 +218,10 @@ def structure_to_cif(
     name: str = "generated",
     uniaxial_symmetry: bool = False,
     crystal_system: str = "Cubic",
-) -> tuple[str, str]:
+) -> tuple[str, str, dict]:
     """Write CIF file with optional symmetry constraints.
     
-    Returns: (cif_string, crystal_system_name)
+    Returns: (cif_string, crystal_system_name, shape_analysis_dict)
     """
     a, b, c, alpha, beta, gamma = lattice_to_params(lattice)
     
@@ -294,27 +294,8 @@ def structure_to_cif(
 
     # Add crystal system information
     buffer.write(f"\ncrystal_system: {crystal_system_name}\n")
-    
-    # Add shape analysis section
-    buffer.write("\n# Shape Analysis\n")
-    
-    # Metric tensor
-    G = shape_analysis['metric_tensor']
-    buffer.write("metric_tensor:\n")
-    for i in range(3):
-        buffer.write(f"  [{G[i, 0]:.6f}, {G[i, 1]:.6f}, {G[i, 2]:.6f}]\n")
-    
-    # Eigenvalues
-    eigenvalues = shape_analysis['eigenvalues']
-    buffer.write(f"eigenvalues: [{eigenvalues[0]:.6f}, {eigenvalues[1]:.6f}, {eigenvalues[2]:.6f}]\n")
-    
-    # Asphericity
-    buffer.write(f"asphericity: {shape_analysis['asphericity']:.6f}\n")
-    
-    # Uniaxiality index
-    buffer.write(f"uniaxiality_index: {shape_analysis['uniaxiality_index']:.6f}\n")
 
-    return buffer.getvalue(), crystal_system_name
+    return buffer.getvalue(), crystal_system_name, shape_analysis
 
 
 # Page config
@@ -429,7 +410,7 @@ if generate_button:
             frac_coords = np.array(result["frac_coords"], dtype=np.float32)
             
             composition = format_composition(species, frac_coords, pocc, ordered_flag)
-            cif, crystal_system_name = structure_to_cif(
+            cif, crystal_system_name, shape_analysis = structure_to_cif(
                 lattice, species, frac_coords, pocc, ordered_flag,
                 uniaxial_symmetry=(uniaxial_symmetry == "Yes"),
                 crystal_system=crystal_system
@@ -447,6 +428,37 @@ if generate_button:
             st.metric("Ordered", "Yes" if ordered_flag else "No")
             st.metric("Number of Atoms", result["num_atoms"])
             st.metric("Crystal System", crystal_system_name)
+            
+            # Shape analysis section with smaller font and compact spacing
+            st.markdown("---")
+            st.markdown("<small><b>Shape Analysis</b></small>", unsafe_allow_html=True)
+            
+            # Metric tensor
+            G = shape_analysis['metric_tensor']
+            st.markdown(f"<small><b>Metric Tensor:</b></small>", unsafe_allow_html=True)
+            metric_text = "<small>"
+            for i in range(3):
+                metric_text += f"[{G[i, 0]:.4f}, {G[i, 1]:.4f}, {G[i, 2]:.4f}]<br>"
+            metric_text += "</small>"
+            st.markdown(metric_text, unsafe_allow_html=True)
+            
+            # Eigenvalues
+            eigenvalues = shape_analysis['eigenvalues']
+            st.markdown(
+                f"<small><b>Eigenvalues:</b> [{eigenvalues[0]:.4f}, {eigenvalues[1]:.4f}, {eigenvalues[2]:.4f}]</small>",
+                unsafe_allow_html=True
+            )
+            
+            # Asphericity and Uniaxiality Index
+            st.markdown(
+                f"<small><b>Asphericity:</b> {shape_analysis['asphericity']:.4f}</small>",
+                unsafe_allow_html=True
+            )
+            st.markdown(
+                f"<small><b>Uniaxiality Index:</b> {shape_analysis['uniaxiality_index']:.4f}</small>",
+                unsafe_allow_html=True
+            )
+            
             st.metric("Elements", ", ".join(result["elements"]))
         
         with col2:
