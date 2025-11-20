@@ -367,7 +367,7 @@ with st.sidebar:
     uniaxial_symmetry = st.radio(
         "Uniaxial symmetry",
         options=["No", "Yes"],
-        index=0,
+        index=1,
     )
     
     crystal_system = "Cubic"
