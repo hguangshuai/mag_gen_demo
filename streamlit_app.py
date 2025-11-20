@@ -191,9 +191,14 @@ def compute_shape_analysis(
     lambda_mid = eigenvalues_sorted[1]
     lambda_max = eigenvalues_sorted[2]
     
-    # Compute asphericity
-    lambda_mean = np.mean(eigenvalues_sorted)
-    asphericity = lambda_max - lambda_mean
+    # Compute asphericity: max of sqrt of lambdas divided by min
+    # When max and min are the same, asphericity = 1
+    if abs(lambda_min) > 1e-10:
+        sqrt_lambda_max = np.sqrt(lambda_max)
+        sqrt_lambda_min = np.sqrt(lambda_min)
+        asphericity = sqrt_lambda_max / sqrt_lambda_min
+    else:
+        asphericity = 1.0  # Default when min is too small
     
     # Compute uniaxiality index
     if abs(lambda_mid) > 1e-10:
