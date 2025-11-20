@@ -419,33 +419,34 @@ if generate_button:
         # Display results
         st.success("✅ Structure generated successfully!")
         
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         
+        # First column: Material Design
         with col1:
+            st.subheader("🧲 Material Design")
+            st.metric("Composition", composition)
+            st.metric("Magnetic Moment", f"{display_magmom:.2f} μB/atom")
+            st.metric("Ordered", "Yes" if ordered_flag else "No")
+            st.metric("Number of Atoms", result["num_atoms"])
+        
+        # Second column: Structure Info
+        with col2:
             st.subheader("📊 Structure Info")
-            # Use compact display with smaller font and spacing
-            st.markdown(f"<div style='line-height: 1.2; font-size: 0.9em;'><b>Composition:</b> {composition}</div>", unsafe_allow_html=True)
-            st.markdown(f"<div style='line-height: 1.2; font-size: 0.9em;'><b>Magnetic Moment:</b> {display_magmom:.2f} μB/atom</div>", unsafe_allow_html=True)
-            st.markdown(f"<div style='line-height: 1.2; font-size: 0.9em;'><b>Ordered:</b> {'Yes' if ordered_flag else 'No'}</div>", unsafe_allow_html=True)
-            st.markdown(f"<div style='line-height: 1.2; font-size: 0.9em;'><b>Number of Atoms:</b> {result['num_atoms']}</div>", unsafe_allow_html=True)
-            st.markdown(f"<div style='line-height: 1.2; font-size: 0.9em;'><b>Crystal System:</b> {crystal_system_name}</div>", unsafe_allow_html=True)
-            
-            # Shape analysis section - reordered
-            # Asphericity
-            st.markdown(f"<div style='line-height: 1.2; font-size: 0.9em;'><b>Asphericity:</b> {shape_analysis['asphericity']:.4f}</div>", unsafe_allow_html=True)
-            
-            # Uniaxiality Index
-            st.markdown(f"<div style='line-height: 1.2; font-size: 0.9em;'><b>Uniaxiality Index:</b> {shape_analysis['uniaxiality_index']:.4f}</div>", unsafe_allow_html=True)
+            st.metric("Crystal System", crystal_system_name)
+            st.metric("Asphericity", f"{shape_analysis['asphericity']:.4f}")
+            st.metric("Uniaxiality Index", f"{shape_analysis['uniaxiality_index']:.4f}")
             
             # Metric tensor
             G = shape_analysis['metric_tensor']
-            metric_str = f"[{G[0, 0]:.4f}, {G[0, 1]:.4f}, {G[0, 2]:.4f}]<br>[{G[1, 0]:.4f}, {G[1, 1]:.4f}, {G[1, 2]:.4f}]<br>[{G[2, 0]:.4f}, {G[2, 1]:.4f}, {G[2, 2]:.4f}]"
-            st.markdown(f"<div style='line-height: 1.2; font-size: 0.9em;'><b>Metric Tensor:</b><br>{metric_str}</div>", unsafe_allow_html=True)
+            metric_str = f"[{G[0, 0]:.4f}, {G[0, 1]:.4f}, {G[0, 2]:.4f}]\n[{G[1, 0]:.4f}, {G[1, 1]:.4f}, {G[1, 2]:.4f}]\n[{G[2, 0]:.4f}, {G[2, 1]:.4f}, {G[2, 2]:.4f}]"
+            st.text("Metric Tensor:")
+            st.code(metric_str, language=None)
             
             # Info tip
             st.caption("ℹ️ Asphericity is 1 when perfectly cubic. For the index, 0 means perfect uniaxial symmetry.")
         
-        with col2:
+        # Third column: CIF File
+        with col3:
             st.subheader("📄 CIF File")
             st.code(cif, language="text")
             
