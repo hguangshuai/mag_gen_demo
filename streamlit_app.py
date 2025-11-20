@@ -304,9 +304,6 @@ with st.sidebar:
         step=1,
     )
     
-    # Symmetry controls
-    st.divider()
-    st.subheader("🔷 Symmetry")
     uniaxial_symmetry = st.radio(
         "Uniaxial symmetry",
         options=["No", "Yes"],
