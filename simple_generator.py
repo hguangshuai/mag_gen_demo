@@ -119,6 +119,7 @@ class SimpleGenerator:
         magmom_per_atom: float,
         ordered: int,
         num_atoms: int = None,
+        num_elements: int = None,
         seed: int = None
     ) -> Dict[str, Any]:
         """Generate structure from conditions."""
@@ -127,11 +128,6 @@ class SimpleGenerator:
         
         # Simplified generation: use magmom to determine elements and structure
         # This is a heuristic-based approach, not true model inference
-        
-        # Determine number of atoms
-        if num_atoms is None:
-            # Heuristic: more magmom -> more atoms (but cap at reasonable size)
-            num_atoms = max(4, min(12, int(4 + magmom_per_atom * 1.5)))
         
         # Generate lattice (simple cubic, scaled by magmom)
         lattice_scale = 4.0 + magmom_per_atom * 0.5
@@ -150,8 +146,21 @@ class SimpleGenerator:
             element_pool = [26, 27, 28, 64, 65, 66, 67]  # Fe, Co, Ni, Gd, Tb, Dy, Ho
         
         # Select elements
-        n_elements = min(3, len(element_pool))
+        if num_elements is not None:
+            n_elements = min(num_elements, len(element_pool))
+        else:
+            n_elements = min(3, len(element_pool))
         selected_elements = np.random.choice(element_pool, size=n_elements, replace=False)
+        
+        # Determine number of atoms
+        if num_atoms is None:
+            if num_elements is not None:
+                # Random number of atoms based on number of elements
+                # At least num_elements atoms, up to a reasonable limit
+                num_atoms = np.random.randint(max(n_elements, 4), 13)
+            else:
+                # Heuristic: more magmom -> more atoms (but cap at reasonable size)
+                num_atoms = max(4, min(12, int(4 + magmom_per_atom * 1.5)))
         
         # Generate species
         species = []
@@ -298,11 +307,10 @@ def format_composition(species: List[str], frac_coords: np.ndarray, pocc: np.nda
                     if occ > 1e-6:
                         ordered_elements[sp] += occ
         
-        comp_parts = []
+        # Merge all elements to ensure each element appears only once
+        all_elements = defaultdict(float)
         
-        # Add disordered sites (e.g., Fe₀.₅Co₀.₅)
-        # If all disordered sites have the same composition, show once
-        # Otherwise, show each unique composition
+        # Collect elements from disordered sites
         if disordered_sites:
             # Get unique disordered site compositions
             unique_disordered = []
@@ -311,22 +319,21 @@ def format_composition(species: List[str], frac_coords: np.ndarray, pocc: np.nda
                 if site_key not in unique_disordered:
                     unique_disordered.append(site_key)
             
-            # Format each unique disordered site
+            # Sum up elements from all disordered sites
             for site_key in unique_disordered:
                 site_dict = dict(site_key)
-                site_str = ""
-                for elem in sorted(site_dict.keys()):
-                    occ_val = site_dict[elem]
-                    occ_rounded = round(occ_val, 1)
-                    occ_str = f"{occ_rounded:.1f}"
-                    occ_subscript = ''.join(subscript_map.get(c, c) for c in occ_str)
-                    site_str += f"{elem}{occ_subscript}"
-                comp_parts.append(site_str)
+                for elem, occ_val in site_dict.items():
+                    all_elements[elem] += occ_val
         
-        # Add ordered elements (e.g., O₂)
-        for elem in sorted(ordered_elements.keys()):
-            count = ordered_elements[elem]
-            count_rounded = round(count, 1)
+        # Add ordered elements
+        for elem, count in ordered_elements.items():
+            all_elements[elem] += count
+        
+        # Format composition: each element appears only once
+        comp_parts = []
+        for elem in sorted(all_elements.keys()):
+            total_count = all_elements[elem]
+            count_rounded = round(total_count, 1)
             if count_rounded == int(count_rounded):
                 count_int = int(count_rounded)
                 if count_int == 1:

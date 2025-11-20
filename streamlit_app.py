@@ -346,7 +346,7 @@ with st.sidebar:
         magmom_input = st.slider(
             "Magnetic moment (μB per atom)",
             min_value=0.5,
-            max_value=10.0,
+            max_value=7.0,
             value=2.0,
             step=0.1,
         )
@@ -356,11 +356,11 @@ with st.sidebar:
         options=["Ordered", "Disordered"],
         index=1,
     )
-    num_atoms = st.slider(
-        "Number of atoms",
-        min_value=3,
-        max_value=12,
-        value=3,
+    num_elements = st.slider(
+        "Number of elements",
+        min_value=1,
+        max_value=5,
+        value=2,
         step=1,
     )
     
@@ -388,7 +388,7 @@ if generate_button:
         
         with st.spinner("Generating structure..."):
             ordered_flag = 1 if ordering == "Ordered" else 0
-            num_atoms_value = int(num_atoms)
+            num_elements_value = int(num_elements)
             
             # If "No" was selected, set magnetic moment to 0
             if use_magnetic == "No":
@@ -406,7 +406,7 @@ if generate_button:
             result = generator.generate(
                 magmom_per_atom=float(magmom),
                 ordered=ordered_flag,
-                num_atoms=num_atoms_value,
+                num_elements=num_elements_value,
             )
             
             species = result["species"]
