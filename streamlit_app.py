@@ -157,6 +157,58 @@ def apply_symmetry_constraints(
     return a_new, b_new, c_new, alpha_new, beta_new, gamma_new, crystal_system_name
 
 
+def compute_shape_analysis(
+    a: float, b: float, c: float, alpha: float, beta: float, gamma: float
+) -> dict:
+    """
+    Compute geometric quantities based on lattice parameters.
+    
+    Returns:
+        dict with keys: metric_tensor, eigenvalues, asphericity, uniaxiality_index
+    """
+    # Convert angles to radians
+    alpha_rad = np.radians(alpha)
+    beta_rad = np.radians(beta)
+    gamma_rad = np.radians(gamma)
+    
+    # Compute metric tensor G
+    cos_alpha = np.cos(alpha_rad)
+    cos_beta = np.cos(beta_rad)
+    cos_gamma = np.cos(gamma_rad)
+    
+    G = np.array([
+        [a**2, a * b * cos_gamma, a * c * cos_beta],
+        [a * b * cos_gamma, b**2, b * c * cos_alpha],
+        [a * c * cos_beta, b * c * cos_alpha, c**2]
+    ])
+    
+    # Compute eigenvalues
+    eigenvalues = np.linalg.eigvals(G)
+    eigenvalues = np.real(eigenvalues)  # Ensure real values
+    eigenvalues_sorted = np.sort(eigenvalues)
+    
+    lambda_min = eigenvalues_sorted[0]
+    lambda_mid = eigenvalues_sorted[1]
+    lambda_max = eigenvalues_sorted[2]
+    
+    # Compute asphericity
+    lambda_mean = np.mean(eigenvalues_sorted)
+    asphericity = lambda_max - lambda_mean
+    
+    # Compute uniaxiality index
+    if abs(lambda_mid) > 1e-10:
+        uniaxiality_index = (lambda_max - lambda_min) / lambda_mid
+    else:
+        uniaxiality_index = 0.0
+    
+    return {
+        'metric_tensor': G,
+        'eigenvalues': eigenvalues_sorted,
+        'asphericity': asphericity,
+        'uniaxiality_index': uniaxiality_index
+    }
+
+
 def structure_to_cif(
     lattice: np.ndarray,
     species: list[str],
@@ -177,6 +229,9 @@ def structure_to_cif(
     a, b, c, alpha, beta, gamma, crystal_system_name = apply_symmetry_constraints(
         a, b, c, alpha, beta, gamma, uniaxial_symmetry, crystal_system
     )
+    
+    # Compute shape analysis after symmetry adjustments
+    shape_analysis = compute_shape_analysis(a, b, c, alpha, beta, gamma)
     
     buffer = StringIO()
     buffer.write(f"data_{name}\n")
@@ -239,6 +294,25 @@ def structure_to_cif(
 
     # Add crystal system information
     buffer.write(f"\ncrystal_system: {crystal_system_name}\n")
+    
+    # Add shape analysis section
+    buffer.write("\n# Shape Analysis\n")
+    
+    # Metric tensor
+    G = shape_analysis['metric_tensor']
+    buffer.write("metric_tensor:\n")
+    for i in range(3):
+        buffer.write(f"  [{G[i, 0]:.6f}, {G[i, 1]:.6f}, {G[i, 2]:.6f}]\n")
+    
+    # Eigenvalues
+    eigenvalues = shape_analysis['eigenvalues']
+    buffer.write(f"eigenvalues: [{eigenvalues[0]:.6f}, {eigenvalues[1]:.6f}, {eigenvalues[2]:.6f}]\n")
+    
+    # Asphericity
+    buffer.write(f"asphericity: {shape_analysis['asphericity']:.6f}\n")
+    
+    # Uniaxiality index
+    buffer.write(f"uniaxiality_index: {shape_analysis['uniaxiality_index']:.6f}\n")
 
     return buffer.getvalue(), crystal_system_name
 
