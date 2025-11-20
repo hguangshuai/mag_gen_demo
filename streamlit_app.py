@@ -357,7 +357,7 @@ with st.sidebar:
         index=1,
     )
     num_elements = st.slider(
-        "Number of elements",
+        "Species",
         min_value=1,
         max_value=7,
         value=2,
@@ -432,7 +432,7 @@ if generate_button:
             st.metric("Composition", composition)
             st.metric("Magnetic Moment", f"{display_magmom:.2f} μB/atom")
             st.metric("Ordered", "Yes" if ordered_flag else "No")
-            st.metric("Number of Atoms", result["num_atoms"])
+            st.metric("Species", ", ".join(result["elements"]))
         
         # Second column: Structure Info
         with col2:
@@ -448,7 +448,7 @@ if generate_button:
             st.code(metric_str, language=None)
             
             # Info tip
-            st.caption("ℹ️ Asphericity is 1 when perfectly cubic. Asphericity > 1 indicates uniaxial symmetry.")
+            st.caption("ℹ️ Asphericity")
         
         # Third column: CIF File
         with col3:
