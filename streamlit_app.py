@@ -359,7 +359,7 @@ with st.sidebar:
     num_elements = st.slider(
         "Number of elements",
         min_value=1,
-        max_value=5,
+        max_value=7,
         value=2,
         step=1,
     )
