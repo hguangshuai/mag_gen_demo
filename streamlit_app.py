@@ -448,7 +448,7 @@ if generate_button:
             st.code(metric_str, language=None)
             
             # Info tip
-            st.caption("ℹ️ Asphericity is 1 when perfectly cubic. Asphericity > 1 indicates uniaxial symmetry. For the index, 0 means perfect uniaxial symmetry.")
+            st.caption("ℹ️ Asphericity is 1 when perfectly cubic. Asphericity > 1 indicates uniaxial symmetry.")
         
         # Third column: CIF File
         with col3:
