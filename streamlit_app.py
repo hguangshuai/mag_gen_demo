@@ -429,37 +429,25 @@ if generate_button:
             st.metric("Number of Atoms", result["num_atoms"])
             st.metric("Crystal System", crystal_system_name)
             
-            # Shape analysis section with smaller font and compact spacing
-            st.markdown("---")
-            st.markdown("<small><b>Shape Analysis</b></small>", unsafe_allow_html=True)
-            
+            # Shape analysis section
             # Metric tensor
             G = shape_analysis['metric_tensor']
-            st.markdown(f"<small><b>Metric Tensor:</b></small>", unsafe_allow_html=True)
-            metric_text = "<small>"
-            for i in range(3):
-                metric_text += f"[{G[i, 0]:.4f}, {G[i, 1]:.4f}, {G[i, 2]:.4f}]<br>"
-            metric_text += "</small>"
-            st.markdown(metric_text, unsafe_allow_html=True)
+            metric_str = f"[{G[0, 0]:.4f}, {G[0, 1]:.4f}, {G[0, 2]:.4f}]<br>[{G[1, 0]:.4f}, {G[1, 1]:.4f}, {G[1, 2]:.4f}]<br>[{G[2, 0]:.4f}, {G[2, 1]:.4f}, {G[2, 2]:.4f}]"
+            st.markdown(f"**Metric Tensor:**<br>{metric_str}", unsafe_allow_html=True)
             
             # Eigenvalues
             eigenvalues = shape_analysis['eigenvalues']
-            st.markdown(
-                f"<small><b>Eigenvalues:</b> [{eigenvalues[0]:.4f}, {eigenvalues[1]:.4f}, {eigenvalues[2]:.4f}]</small>",
-                unsafe_allow_html=True
-            )
+            eigenvalues_str = f"[{eigenvalues[0]:.4f}, {eigenvalues[1]:.4f}, {eigenvalues[2]:.4f}]"
+            st.markdown(f"**Eigenvalues:** {eigenvalues_str}")
             
-            # Asphericity and Uniaxiality Index
-            st.markdown(
-                f"<small><b>Asphericity:</b> {shape_analysis['asphericity']:.4f}</small>",
-                unsafe_allow_html=True
-            )
-            st.markdown(
-                f"<small><b>Uniaxiality Index:</b> {shape_analysis['uniaxiality_index']:.4f}</small>",
-                unsafe_allow_html=True
-            )
+            # Asphericity
+            st.markdown(f"**Asphericity:** {shape_analysis['asphericity']:.4f}")
             
-            st.metric("Elements", ", ".join(result["elements"]))
+            # Uniaxiality Index
+            st.markdown(f"**Uniaxiality Index:** {shape_analysis['uniaxiality_index']:.4f}")
+            
+            # Info tip
+            st.caption("ℹ️ Asphericity is 1 when perfectly cubic. For the index, 0 means perfect uniaxial symmetry.")
         
         with col2:
             st.subheader("📄 CIF File")
