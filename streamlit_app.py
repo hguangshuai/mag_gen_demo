@@ -42,6 +42,121 @@ def load_generator():
     return SimpleGenerator(weights_path)
 
 
+def params_to_lattice(a: float, b: float, c: float, alpha: float, beta: float, gamma: float) -> np.ndarray:
+    """Convert lattice parameters to 3x3 lattice matrix."""
+    alpha_rad = np.radians(alpha)
+    beta_rad = np.radians(beta)
+    gamma_rad = np.radians(gamma)
+    
+    # Calculate volume
+    cos_alpha = np.cos(alpha_rad)
+    cos_beta = np.cos(beta_rad)
+    cos_gamma = np.cos(gamma_rad)
+    sin_gamma = np.sin(gamma_rad)
+    
+    volume = a * b * c * np.sqrt(
+        1 - cos_alpha**2 - cos_beta**2 - cos_gamma**2 + 2 * cos_alpha * cos_beta * cos_gamma
+    )
+    
+    # Build lattice matrix
+    lattice = np.zeros((3, 3))
+    lattice[0, 0] = a
+    lattice[0, 1] = 0.0
+    lattice[0, 2] = 0.0
+    
+    lattice[1, 0] = b * cos_gamma
+    lattice[1, 1] = b * sin_gamma
+    lattice[1, 2] = 0.0
+    
+    lattice[2, 0] = c * cos_beta
+    if abs(sin_gamma) > 1e-10:
+        lattice[2, 1] = c * (cos_alpha - cos_beta * cos_gamma) / sin_gamma
+        lattice[2, 2] = volume / (a * b * sin_gamma)
+    else:
+        # Handle edge case when sin_gamma ≈ 0
+        lattice[2, 1] = 0.0
+        lattice[2, 2] = c
+    
+    return lattice
+
+
+def apply_symmetry_constraints(
+    a: float, b: float, c: float, 
+    alpha: float, beta: float, gamma: float,
+    uniaxial_symmetry: bool,
+    crystal_system: str
+) -> tuple[float, float, float, float, float, float, str]:
+    """
+    Apply symmetry constraints with small random perturbations.
+    
+    Returns: (a, b, c, alpha, beta, gamma, crystal_system_name)
+    """
+    # Small random perturbation (±1-3%)
+    perturbation = np.random.uniform(-0.03, 0.03)
+    
+    if not uniaxial_symmetry:
+        # Cubic: a = b = c, α = β = γ = 90°
+        base_a = (a + b + c) / 3.0
+        a_new = base_a * (1 + perturbation)
+        b_new = a_new  # Enforce a = b = c
+        c_new = a_new
+        alpha_new = 90.0
+        beta_new = 90.0
+        gamma_new = 90.0
+        crystal_system_name = "Cubic"
+        
+    elif crystal_system == "Tetragonal":
+        # Tetragonal: a = b ≠ c, α = β = γ = 90°
+        base_a = (a + b) / 2.0
+        a_new = base_a * (1 + perturbation)
+        b_new = a_new  # Enforce a = b
+        c_new = c * (1 + np.random.uniform(-0.03, 0.03))
+        alpha_new = 90.0
+        beta_new = 90.0
+        gamma_new = 90.0
+        crystal_system_name = "Tetragonal"
+        
+    elif crystal_system == "Trigonal":
+        # Trigonal (Rhombohedral): a = b = c, α = β = γ ≠ 90°
+        base_a = (a + b + c) / 3.0
+        base_alpha = (alpha + beta + gamma) / 3.0
+        # Ensure alpha is not 90° and is reasonable (60-120°)
+        if abs(base_alpha - 90.0) < 5.0:
+            base_alpha = 75.0 if base_alpha < 90.0 else 105.0
+        
+        a_new = base_a * (1 + perturbation)
+        b_new = a_new  # Enforce a = b = c
+        c_new = a_new
+        alpha_new = base_alpha * (1 + np.random.uniform(-0.02, 0.02))
+        alpha_new = np.clip(alpha_new, 60.0, 120.0)
+        beta_new = alpha_new  # Enforce α = β = γ
+        gamma_new = alpha_new
+        crystal_system_name = "Trigonal"
+        
+    elif crystal_system == "Hexagonal":
+        # Hexagonal: a = b ≠ c, α = β = 90°, γ = 120°
+        base_a = (a + b) / 2.0
+        a_new = base_a * (1 + perturbation)
+        b_new = a_new  # Enforce a = b
+        c_new = c * (1 + np.random.uniform(-0.03, 0.03))
+        alpha_new = 90.0
+        beta_new = 90.0
+        gamma_new = 120.0  # Enforce γ = 120°
+        crystal_system_name = "Hexagonal"
+        
+    else:
+        # Fallback: no constraints
+        a_new = a * (1 + perturbation)
+        b_new = b * (1 + np.random.uniform(-0.03, 0.03))
+        c_new = c * (1 + np.random.uniform(-0.03, 0.03))
+        alpha_new = alpha
+        beta_new = beta
+        gamma_new = gamma
+        crystal_system_name = "Triclinic"
+    
+    return a_new, b_new, c_new, alpha_new, beta_new, gamma_new, crystal_system_name
+
+
 def structure_to_cif(
     lattice: np.ndarray,
     species: list[str],
@@ -49,9 +164,20 @@ def structure_to_cif(
     pocc: np.ndarray,
     ordered: int,
     name: str = "generated",
-) -> str:
-    """Write CIF file."""
+    uniaxial_symmetry: bool = False,
+    crystal_system: str = "Cubic",
+) -> tuple[str, str]:
+    """Write CIF file with optional symmetry constraints.
+    
+    Returns: (cif_string, crystal_system_name)
+    """
     a, b, c, alpha, beta, gamma = lattice_to_params(lattice)
+    
+    # Apply symmetry constraints
+    a, b, c, alpha, beta, gamma, crystal_system_name = apply_symmetry_constraints(
+        a, b, c, alpha, beta, gamma, uniaxial_symmetry, crystal_system
+    )
+    
     buffer = StringIO()
     buffer.write(f"data_{name}\n")
     buffer.write(f"_cell_length_a    {a:.6f}\n")
@@ -111,7 +237,10 @@ def structure_to_cif(
         for idx, (sp, (x, y, z), occ) in enumerate(zip(species, frac_coords, pocc), start=1):
             buffer.write(f"  {sp}{idx} {sp} {x:.6f} {y:.6f} {z:.6f} 1.0000\n")
 
-    return buffer.getvalue()
+    # Add crystal system information
+    buffer.write(f"\ncrystal_system: {crystal_system_name}\n")
+
+    return buffer.getvalue(), crystal_system_name
 
 
 # Page config
@@ -174,6 +303,24 @@ with st.sidebar:
         value=3,
         step=1,
     )
+    
+    # Symmetry controls
+    st.divider()
+    st.subheader("🔷 Symmetry")
+    uniaxial_symmetry = st.radio(
+        "Uniaxial symmetry",
+        options=["No", "Yes"],
+        index=0,
+    )
+    
+    crystal_system = "Cubic"
+    if uniaxial_symmetry == "Yes":
+        crystal_system = st.selectbox(
+            "Crystal system",
+            options=["Tetragonal", "Trigonal", "Hexagonal"],
+            index=0,
+        )
+    
     generate_button = st.button("🚀 Generate Structure", type="primary", use_container_width=True)
 
 # Main content
@@ -211,7 +358,11 @@ if generate_button:
             frac_coords = np.array(result["frac_coords"], dtype=np.float32)
             
             composition = format_composition(species, frac_coords, pocc, ordered_flag)
-            cif = structure_to_cif(lattice, species, frac_coords, pocc, ordered_flag)
+            cif, crystal_system_name = structure_to_cif(
+                lattice, species, frac_coords, pocc, ordered_flag,
+                uniaxial_symmetry=(uniaxial_symmetry == "Yes"),
+                crystal_system=crystal_system
+            )
         
         # Display results
         st.success("✅ Structure generated successfully!")
@@ -224,6 +375,7 @@ if generate_button:
             st.metric("Magnetic Moment", f"{display_magmom:.2f} μB/atom")
             st.metric("Ordered", "Yes" if ordered_flag else "No")
             st.metric("Number of Atoms", result["num_atoms"])
+            st.metric("Crystal System", crystal_system_name)
             st.metric("Elements", ", ".join(result["elements"]))
         
         with col2:
