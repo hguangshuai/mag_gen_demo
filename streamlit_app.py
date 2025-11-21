@@ -335,14 +335,13 @@ st.warning(
 with st.sidebar:
     st.header("⚙️ Parameters")
     
-    # Yes/No selection for magnetic moment
-    use_magnetic = st.radio(
+    # Checkbox for magnetic moment
+    use_magnetic = st.checkbox(
         "Is magnetic?",
-        options=["Yes", "No"],
-        index=0,
+        value=True,
     )
     
-    if use_magnetic == "Yes":
+    if use_magnetic:
         magmom_input = st.slider(
             "Magnetic moment (μB per atom)",
             min_value=0.5,
@@ -358,25 +357,16 @@ with st.sidebar:
     )
     num_elements = st.slider(
         "Species",
-        min_value=1,
+        min_value=3,
         max_value=7,
-        value=2,
+        value=3,
         step=1,
     )
     
-    uniaxial_symmetry = st.radio(
+    uniaxial_symmetry = st.checkbox(
         "Uniaxial symmetry",
-        options=["No", "Yes"],
-        index=1,
+        value=True,
     )
-    
-    crystal_system = "Cubic"
-    if uniaxial_symmetry == "Yes":
-        crystal_system = st.selectbox(
-            "Crystal system",
-            options=["Tetragonal", "Trigonal", "Hexagonal"],
-            index=0,
-        )
     
     generate_button = st.button("🚀 Generate Structure", type="primary", use_container_width=True)
 
@@ -390,15 +380,15 @@ if generate_button:
             ordered_flag = 1 if ordering == "Ordered" else 0
             num_elements_value = int(num_elements)
             
-            # If "No" was selected, set magnetic moment to 0
-            if use_magnetic == "No":
+            # If not magnetic, set magnetic moment to 0
+            if not use_magnetic:
                 magmom_input = 0.0
             
             # Save the display value (user's input)
             display_magmom = magmom_input
             
-            # Automatically add 2 for "Yes" selection, use original value for "No"
-            if use_magnetic == "Yes":
+            # Automatically add 2 for magnetic selection, use original value for non-magnetic
+            if use_magnetic:
                 magmom = magmom_input + 2.0
             else:
                 magmom = magmom_input
@@ -415,9 +405,15 @@ if generate_button:
             frac_coords = np.array(result["frac_coords"], dtype=np.float32)
             
             composition = format_composition(species, frac_coords, pocc, ordered_flag)
+            
+            # Randomly select crystal system when uniaxial symmetry is enabled
+            crystal_system = "Cubic"
+            if uniaxial_symmetry:
+                crystal_system = np.random.choice(["Tetragonal", "Trigonal", "Hexagonal"])
+            
             cif, crystal_system_name, shape_analysis = structure_to_cif(
                 lattice, species, frac_coords, pocc, ordered_flag,
-                uniaxial_symmetry=(uniaxial_symmetry == "Yes"),
+                uniaxial_symmetry=uniaxial_symmetry,
                 crystal_system=crystal_system
             )
         
@@ -447,8 +443,9 @@ if generate_button:
             st.text("Metric Tensor:")
             st.code(metric_str, language=None)
             
-            # Info tip
+            # Info tips
             st.caption("ℹ️ Asphericity is 1 when perfectly cubic; >1 indicates uniaxial symmetry.")
+            st.caption("ℹ️ Uniaxiality Index: 0 means perfect uniaxial symmetry; larger values indicate deviation from uniaxial symmetry.")
         
         # Third column: CIF File
         with col3:
@@ -472,17 +469,15 @@ if generate_button:
 # Instructions
 with st.expander("ℹ️ How to use"):
     st.markdown("""
-    1. **Specify magnetic moment?**
-       - **Yes**: Choose your desired magnetic moment (will automatically add 2.0)
-       - **No**: A random value between 0-2 will be generated
-    
-    2. **Adjust other parameters** in the sidebar:
+    1. **Adjust parameters** in the sidebar:
+       - Is magnetic?: Check to enable magnetic moment selection
        - Ordering: Choose Ordered or Disordered structure
-       - Number of atoms: Set to 0 for automatic, or specify a number
+       - Species: Select number of species (3-7)
+       - Uniaxial symmetry: Check to enable uniaxial symmetry (randomly selects crystal system)
     
-    3. **Click "Generate Structure"** to create a new crystal structure
+    2. **Click "Generate Structure"** to create a new crystal structure
     
-    4. **Download the CIF file** to use in your simulations
+    3. **Download the CIF file** to use in your simulations
     
     **Note**: This is a simplified version using numpy. For higher accuracy, 
     use the full PyTorch model version.
