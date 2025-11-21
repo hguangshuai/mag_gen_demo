@@ -478,8 +478,5 @@ with st.expander("ℹ️ How to use"):
     2. **Click "Generate Structure"** to create a new crystal structure
     
     3. **Download the CIF file** to use in your simulations
-    
-    **Note**: This is a simplified version using numpy. For higher accuracy, 
-    use the full PyTorch model version.
     """)
 
