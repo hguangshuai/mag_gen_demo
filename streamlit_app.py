@@ -344,7 +344,7 @@ with st.sidebar:
     if use_magnetic:
         magmom_input = st.slider(
             "Magnetic moment (μB per atom)",
-            min_value=0.5,
+            min_value=0.01,
             max_value=7.0,
             value=2.0,
             step=0.1,
