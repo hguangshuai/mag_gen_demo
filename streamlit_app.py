@@ -42,6 +42,72 @@ def load_generator():
     return SimpleGenerator(weights_path)
 
 
+def bsat_to_magmom_per_atom(bsat_tesla: float, unit_cell_volume_m3: float = None, num_atoms: int = None) -> float:
+    """
+    Convert B_sat (Tesla) to magnetic moment per atom (μB).
+    
+    Formula: B_s = μ_0 × M_s
+    M_s = (Total moment (µ_B) × 9.274 × 10^-24) / (Unit cell volume)
+    
+    If unit_cell_volume and num_atoms are not provided, uses typical values for estimation.
+    """
+    mu_0 = 4 * np.pi * 1e-7  # T·m/A
+    bohr_magneton = 9.274e-24  # A·m^2
+    
+    # Calculate M_s from B_s
+    M_s = bsat_tesla / mu_0  # A/m
+    
+    # Use typical values if not provided
+    if unit_cell_volume_m3 is None:
+        # Typical unit cell volume: ~100 Å³ = 1e-28 m³
+        unit_cell_volume_m3 = 1e-28
+    
+    if num_atoms is None:
+        # Typical number of atoms per unit cell
+        num_atoms = 4
+    
+    # Calculate total moment in μB
+    total_moment_mub = (M_s * unit_cell_volume_m3) / bohr_magneton
+    
+    # Calculate per atom
+    magmom_per_atom = total_moment_mub / num_atoms
+    
+    return magmom_per_atom
+
+
+def calculate_unit_cell_volume(lattice: np.ndarray) -> float:
+    """
+    Calculate unit cell volume from lattice matrix.
+    Volume = |det(lattice)| in m^3 (assuming lattice is in Angstroms, convert to meters)
+    """
+    # Lattice is typically in Angstroms, convert to meters
+    lattice_m = lattice * 1e-10  # Convert Å to m
+    volume_m3 = abs(np.linalg.det(lattice_m))  # m^3
+    return volume_m3
+
+
+def magmom_per_atom_to_bsat(magmom_per_atom: float, unit_cell_volume_m3: float, num_atoms: int) -> float:
+    """
+    Convert magnetic moment per atom (μB) to B_sat (Tesla).
+    
+    Formula: B_s = μ_0 × M_s
+    M_s = (Total moment (µ_B) × 9.274 × 10^-24) / (Unit cell volume)
+    """
+    mu_0 = 4 * np.pi * 1e-7  # T·m/A
+    bohr_magneton = 9.274e-24  # A·m^2
+    
+    # Calculate total moment
+    total_moment_mub = magmom_per_atom * num_atoms
+    
+    # Calculate M_s
+    M_s = (total_moment_mub * bohr_magneton) / unit_cell_volume_m3  # A/m
+    
+    # Calculate B_s
+    bsat = mu_0 * M_s  # Tesla
+    
+    return bsat
+
+
 def params_to_lattice(a: float, b: float, c: float, alpha: float, beta: float, gamma: float) -> np.ndarray:
     """Convert lattice parameters to 3x3 lattice matrix."""
     alpha_rad = np.radians(alpha)
@@ -342,13 +408,19 @@ with st.sidebar:
     )
     
     if use_magnetic:
-        magmom_input = st.slider(
-            "Magnetic moment (μB per atom)",
+        bsat_input = st.slider(
+            "Bsat (Tesla)",
             min_value=0.01,
-            max_value=7.0,
-            value=2.0,
+            max_value=3.0,
+            value=1.0,
             step=0.1,
         )
+        # Convert Bsat to magnetic moment per atom for internal use
+        # Using typical values for estimation
+        magmom_input = bsat_to_magmom_per_atom(bsat_input)
+    else:
+        bsat_input = 0.0
+        magmom_input = 0.0
     
     ordering = st.radio(
         "Ordering",
@@ -380,12 +452,9 @@ if generate_button:
             ordered_flag = 1 if ordering == "Ordered" else 0
             num_elements_value = int(num_elements)
             
-            # If not magnetic, set magnetic moment to 0
-            if not use_magnetic:
-                magmom_input = 0.0
-            
             # Save the display value (user's input)
             display_magmom = magmom_input
+            display_bsat = bsat_input
             
             # Automatically add 2 for magnetic selection, use original value for non-magnetic
             if use_magnetic:
@@ -416,6 +485,16 @@ if generate_button:
                 uniaxial_symmetry=uniaxial_symmetry,
                 crystal_system=crystal_system
             )
+            
+            # Calculate actual unit cell volume and Bsat
+            unit_cell_volume_m3 = calculate_unit_cell_volume(lattice)
+            num_atoms_actual = result["num_atoms"]
+            # Calculate Bsat from the actual magmom_per_atom (before adding 2.0)
+            actual_magmom = display_magmom if use_magnetic else 0.0
+            if use_magnetic and actual_magmom > 0:
+                bsat_calculated = magmom_per_atom_to_bsat(actual_magmom, unit_cell_volume_m3, num_atoms_actual)
+            else:
+                bsat_calculated = 0.0
         
         # Display results
         st.success("✅ Structure generated successfully!")
@@ -426,6 +505,7 @@ if generate_button:
         with col1:
             st.subheader("🧲 Material Design")
             st.metric("Composition", composition)
+            st.metric("Bsat", f"{bsat_calculated:.3f} T")
             st.metric("Magnetic Moment", f"{display_magmom:.2f} μB/atom")
             st.metric("Ordered", "Yes" if ordered_flag else "No")
             st.metric("Species", ", ".join(result["elements"]))
