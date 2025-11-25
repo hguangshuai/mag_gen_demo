@@ -486,7 +486,7 @@ if generate_button:
                 crystal_system=crystal_system
             )
             
-            # Calculate actual unit cell volume and Bsat
+            # Calculate actual unit cell volume and Bsat (for internal use, not displayed)
             unit_cell_volume_m3 = calculate_unit_cell_volume(lattice)
             num_atoms_actual = result["num_atoms"]
             # Calculate Bsat from the actual magmom_per_atom (before adding 2.0)
@@ -505,7 +505,6 @@ if generate_button:
         with col1:
             st.subheader("🧲 Material Design")
             st.metric("Composition", composition)
-            st.metric("Bsat", f"{bsat_calculated:.3f} T")
             st.metric("Magnetic Moment", f"{display_magmom:.2f} μB/atom")
             st.metric("Ordered", "Yes" if ordered_flag else "No")
             st.metric("Species", ", ".join(result["elements"]))
