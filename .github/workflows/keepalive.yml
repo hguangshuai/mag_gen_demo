@@ -3,13 +3,24 @@ name: Keep Streamlit Alive
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/3 * * * *"
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping app
-        run: curl -s https://maggendemo-bgml8eg9b8b7rhocqbwzjy.streamlit.app/ > /dev/null
+      - name: Ping app with browser-like headers
+        run: |
+          curl -s -L \
+            -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+            -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" \
+            -H "Accept-Language: en-US,en;q=0.9" \
+            -H "Connection: keep-alive" \
+            https://maggendemo-bgml8eg9b8b7rhocqbwzjy.streamlit.app/ > /dev/null
+          sleep 2
+          curl -s -L \
+            -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+            -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" \
+            https://maggendemo-bgml8eg9b8b7rhocqbwzjy.streamlit.app/ > /dev/null
 
 
