@@ -137,13 +137,37 @@ class SimpleGenerator:
         # Higher magmom -> transition metals
         if magmom_per_atom < 2.0:
             # Light elements
-            element_pool = [6, 7, 8, 13, 14, 15, 16]  # C, N, O, Al, Si, P, S
+            element_pool = [5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 19, 20]  # B, C, N, O, F, Na, Mg, Al, Si, P, S, Cl, K, Ca
         elif magmom_per_atom < 5.0:
             # Medium magmom -> 3d metals
-            element_pool = [22, 23, 24, 25, 26, 27, 28]  # Ti, V, Cr, Mn, Fe, Co, Ni
+            # With probability to form oxides
+            metal_pool = [22, 23, 24, 25, 26, 27, 28]  # Ti, V, Cr, Mn, Fe, Co, Ni
+            
+            # 40% chance to form oxide
+            if np.random.random() < 0.4:
+                # Select 1-2 metals and oxygen
+                n_metals = np.random.randint(1, 3)
+                selected_metals = np.random.choice(metal_pool, size=min(n_metals, len(metal_pool)), replace=False)
+                element_pool = np.concatenate([selected_metals, [8]])  # Add O (atomic number 8)
+            else:
+                # Pure metal (original behavior)
+                element_pool = metal_pool
         else:
             # High magmom -> rare earths + transition metals
-            element_pool = [26, 27, 28, 64, 65, 66, 67]  # Fe, Co, Ni, Gd, Tb, Dy, Ho
+            # With probability to form nitrides/oxides/carbides/borides
+            metal_pool = [26, 27, 28, 64, 65, 66, 67]  # Fe, Co, Ni, Gd, Tb, Dy, Ho
+            nonmetal_pool = [5, 6, 7, 8]  # B, C, N, O
+            
+            # 40% chance to form compound (nitride/oxide/carbide/boride)
+            if np.random.random() < 0.4:
+                # Select 1-2 metals and 1 nonmetal
+                n_metals = np.random.randint(1, 3)
+                selected_metals = np.random.choice(metal_pool, size=min(n_metals, len(metal_pool)), replace=False)
+                selected_nonmetal = np.random.choice(nonmetal_pool, size=1)
+                element_pool = np.concatenate([selected_metals, selected_nonmetal])
+            else:
+                # Pure metal (original behavior)
+                element_pool = metal_pool
         
         # Select elements
         if num_elements is not None:
