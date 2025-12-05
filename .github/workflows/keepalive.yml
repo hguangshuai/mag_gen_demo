@@ -10,6 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping app
-        run: curl -s https://magnitorammed.streamlit.app/ > /dev/null
+        run: curl -s https://maggendemo-bgml8eg9b8b7rhocqbwzjy.streamlit.app/ > /dev/null
 
 
